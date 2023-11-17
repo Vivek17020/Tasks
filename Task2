@@ -1,0 +1,39 @@
+const express = require('express');
+const Web3 = require('web3');
+const app = express();
+
+// Connect to an Ethereum node (e.g., Infura)
+const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/965ea2c5949e4d0db13d7f32a39aa0a7'));
+
+// Handle deposit endpoint
+app.post('/deposit', async (req, res) => {
+  try {
+    // Replace these with your contract and token details
+    const aaveContractAddress = '0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04';
+    const tokenAddress = '0x3a3A65aAb0dd2A17E3F1947bA16138cd37d08c04';
+    const amountToDeposit = '1000000000000000000'; // 1 ERC20 token in Wei
+
+    // Get the user's address from the request (ensure proper validation/authentication)
+    const userAddress = req.body.userAddress;
+
+    // Create Aave contract instance
+    const aaveContract = new web3.eth.Contract(aaveContractABI, aaveContractAddress);
+
+    // Call deposit method on Aave contract
+    const tx = aaveContract.methods.deposit(tokenAddress, amountToDeposit).send({
+      from: userAddress,
+      gasLimit: '300000', // Adjust gas limit accordingly
+      gasPrice: '10000000000', // Adjust gas price accordingly
+    });
+
+    res.json({ status: 'Transaction submitted', transactionHash: (await tx).transactionHash });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
